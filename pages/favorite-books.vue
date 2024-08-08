@@ -1,4 +1,3 @@
-
 <template>
   <ListOfBooks :products="products" />
 </template>
