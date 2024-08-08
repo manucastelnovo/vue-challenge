@@ -9,4 +9,5 @@ export interface Book {
   ia?: string[]; // Opcional
   author_key: string[];
   public_scan_b: boolean;
+  isFavorite:boolean;
 }
