@@ -64,11 +64,10 @@ const isLoading = ref(false);
 const onSubmit = async () => {
   isLoading.value = true;
   try {
-    console.log("Search Query:", searchQuery.value);
-    console.log("Search Type:", searchType.value);
+
 
     await store.searchBooks(searchQuery.value, searchType.value);
-    console.log(store.books);
+
   } catch (error) {
     console.error("Error searching books:", error);
   } finally {
