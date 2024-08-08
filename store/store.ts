@@ -1,34 +1,40 @@
 import { defineStore } from 'pinia'
 import axios from 'axios';
 import type { Book } from '~/models/book';
+import { setIsFavoriteProperty } from '~/use_cases/setIsFavoriteProperty';
+
+const API_URL = "https://openlibrary.org/search.json"
 
 export const useBooksStore = defineStore('books', {
-    state: () => ({
-        books: [],
-        //TODO: ver este tema para que retorne una lista vacia si no tiene localstorage
-        favorites: []
-    }),
-
+    
+    state: () => {
+        return {
+            books: [] as Book[],
+            favorites: [] as Book[]
+        }
+    },
     actions: {
         async searchBooks(query: string, type: string) {
             try {
-                const response = await axios.get(`https://openlibrary.org/search.json?${type}=${query}&limit=10`);
-                console.log(`https://openlibrary.org/search.json?${type}=${query}`)
-                this.books = response.data.docs
-                console.log(type)
-                console.log(this.books)
+                const response = await axios.get(`${API_URL}?${type}=${query}&limit=10`);
+                this.books = setIsFavoriteProperty(response.data.docs,this.favorites)
             } catch (error) {
                 console.error('Error fetching books', error);
             }
         },
-        // addFavorite(book:Book){
-        //     if(!this.favorites.some((fav: Book) => fav.key === book.key)){
-        //         this.favorites.push(book)
-        //     }
-        // },  
-        // removeFromFavorites(book:Book) {
-        //     this.favorites = this.favorites.filter((fav: Book) => fav.key !== book.key);
-        //     localStorage.setItem('favorites', JSON.stringify(this.favorites));
-        //   },
-    }
+        addFavorite(book: Book) {
+            if (!this.favorites.some((fav: Book) => fav.key === book.key)) {
+                book.isFavorite = true;
+                this.favorites = [...this.favorites, book]
+            }
+        },
+        removeFromFavorites(book:Book) {
+            this.favorites = this.favorites.filter((fav: Book) => fav.key !== book.key);
+            this.books = setIsFavoriteProperty(this.books,this.favorites)
+          },
+    },
+    persist: {
+        storage: persistedState.localStorage,
+      },
+
 })
