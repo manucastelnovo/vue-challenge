@@ -1,17 +1,3 @@
-<!--
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
--->
 <template>
   <div class="bg-white py-4 sm:py-4">
     <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -29,9 +15,13 @@
           By title, author or subject.
         </p>
         <div class="flex flex-col w-full md:flex-row">
-          <form class="mx-auto mt-10 flex max-w-md gap-x-4">
+          <form
+            @submit.prevent="onSubmit"
+            class="mx-auto mt-10 flex max-w-md gap-x-4"
+          >
             <label for="book" class="sr-only">Book</label>
             <input
+              v-model="searchQuery"
               id="book-id"
               name="book"
               type="text"
@@ -53,16 +43,18 @@
               >Search by</label
             >
             <select
+              v-model="searchType"
               id="type"
               name="type"
               class="mt-4 block justify-s w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
             >
-              <option>Title</option>
-              <option selected="">Author</option>
-              <option>Subject</option>
+              <option value="title">Title</option>
+              <option value="author">Author</option>
+              <option value="q">Subject</option>
             </select>
           </div>
         </div>
+
         <svg
           viewBox="0 0 1024 1024"
           class="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2"
@@ -92,4 +84,35 @@
       </div>
     </div>
   </div>
+  <div class="h-12 my-4">
+    <div v-if="isLoading" class="flex items-center justify-center">
+      <p class="text-gray-500">Loading...</p>
+    </div>
+  </div>
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { useBooksStore } from "~/store/store.ts";
+
+const store = useBooksStore();
+
+const searchQuery = ref("");
+const searchType = ref("title");
+const isLoading = ref(false);
+
+const onSubmit = async () => {
+  isLoading.value = true;
+  try {
+    console.log("Search Query:", searchQuery.value);
+    console.log("Search Type:", searchType.value);
+
+    await store.searchBooks(searchQuery.value, searchType.value);
+    console.log(store.books);
+  } catch (error) {
+    console.error("Error searching books:", error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+</script>
