@@ -49,5 +49,5 @@ const store = useBooksStore();
 
 const route = useRoute();
 const product = route.query;
-console.log(product)
+
 </script>
